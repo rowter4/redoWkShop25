@@ -9,5 +9,9 @@
 <body>
     
     <h2> Welcome <span data-th-text="${username}"></span></h2>
+
+    <form action="/authenticate/logout" method="GET">
+        <button type="submit">Log Out</button> 
+    </form>
 </body>
 </html>

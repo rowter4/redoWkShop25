@@ -1,9 +1,12 @@
 package sg.edu.nus.iss.workshop25Redo.controller;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +22,8 @@ public class AuthenticateController {
     private UserService userSvc;
 
     @PostMapping
-    public ModelAndView getAuthenticated(@RequestBody MultiValueMap<String,String> form) {
+    public ModelAndView getAuthenticated(@RequestBody MultiValueMap<String,String> form,
+                                            HttpSession session) {
         
         String username = form.getFirst("username");
         String password = form.getFirst("password");
@@ -28,14 +32,23 @@ public class AuthenticateController {
         ModelAndView mvc = new ModelAndView();
 
         if (userSvc.authenticate(username,password)) {
-            mvc.setViewName("welcome");
-            mvc.setStatus(HttpStatus.OK);
-            mvc.addObject("username", username);
+            session.setAttribute("username", username);
+            mvc = new ModelAndView("redirect:/protected/welcome");
+
+            // mvc.setViewName("welcome"); these codes are transfered to the protected controller
+            // mvc.setStatus(HttpStatus.OK);
+            // mvc.addObject("username", username);
         } else {   
             mvc.setViewName("error");
             mvc.setStatus(HttpStatus.FORBIDDEN);   
         }
         
         return mvc;
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session){
+        session.invalidate();
+        return "index";
     }
 }
